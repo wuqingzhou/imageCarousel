@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" class="no-js">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<style>
+	.bannerBox{ width:800px;  height: 360px; margin: 0 auto; border:1px solid #ddd; background: #D7D7D7; overflow: hidden;}
+	.bannerBox>img{ width:100%; height: 100%;}
+	
+	.wqzImgBox{ }
+	.wqzImgBox .wqzImgBoxItem{ }
+</style>
+</head>
+<body>
+	<div class="bannerBox wqzImgBox">
+		<img class="wqzImgBoxItem" src="images/banner1.jpg" />
+		<img class="wqzImgBoxItem" src="images/banner2.jpg" />
+		<img class="wqzImgBoxItem" src="images/banner3.jpg" />
+		<img class="wqzImgBoxItem" src="images/banner4.jpg" />	
+	</div>
+	<!--<div class="tool">
+		<div>
+			特效类型：	<input type="radio" name="effectType" value="0" checked/><span>直线推进</span>
+						<input type="radio" name="effectType" value="1"/>css3缩放，直线推进
+		</div>
+		<div>
+			<button id="sx">刷新</button><i>重新选择特效类型后，单击刷新按钮后才会起作用</i>
+		</div>
+	</div>-->
+</body>
+</html>
+<script src="js/jquery-1.11.2.min.js"></script>
+<script src="js/imageCarousel.js"></script>
+<script>
+	$(function(){
+		$(".bannerBox").wqzImgBox({
+			effectType:		3,
+			showDuration:	1000,
+			switchDuration: 1000,
+			onAfterSwitch: function(){
+				console.info("onAfterSwitch");
+			}
+		});
+	}).on("click",function(){
+		$(".bannerBox").wqzImgBox("destroy");
+	});
+</script>
