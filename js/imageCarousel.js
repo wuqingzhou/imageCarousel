@@ -39,6 +39,8 @@
  * 		2. 如何使showDuration不包含switchDuration？
  * 			解决：每次执行动画前清除掉定时器，执行完动画后再重新启动定时器。
  * 
+ * gitHub：	https://github.com/wuqingzhou/imageCarousel
+ * 
  * 作者：	吴庆周 Email：wuqingzhou1989@yeah.net QQ：971532380
  * 
  */
@@ -125,9 +127,9 @@ $.fn.wqzImgBox?console.error("jQuery插件冲突！\n文件："+decodeURICompone
 		this.curImgNo = 0;						// 当前显示的图片编号
 		this.tgtImgNo = 1;						// 将要显示的图片的编号
 		this.$btBar = null;						// 底部工具栏
-		this.$btBarChild = null;				// 底部工具栏子项
-		this.$ltSideBar = null;					// 左侧工具栏
-		this.$rtSideBar = null;					// 右侧工具栏
+//		this.$btBarChild = null;				// 底部工具栏子项
+//		this.$ltSideBar = null;					// 左侧工具栏
+//		this.$rtSideBar = null;					// 右侧工具栏
 		this.timer = null;						// 定时器
 //		this.curTime = (new Date()).getTime();	// 当前时间
 	};
@@ -148,9 +150,12 @@ $.fn.wqzImgBox?console.error("jQuery插件冲突！\n文件："+decodeURICompone
 			this.bindEvent();	// 绑定事件
 		},
 		layout: function(){			// 布局
-			this.containerLayout();	// 目标容器布局
-//			this.btBarLayout();		// 底部工具栏布局
-//			this.sideBarLayout();	// 侧边栏布局
+			var $plugin = this;
+			$plugin.containerLayout();	// 目标容器布局
+			if($plugin._options.btBar.enable){
+				$plugin.btBarLayout();	// 底部工具栏布局
+			}
+//			$plugin.sideBarLayout();	// 侧边栏布局
 		},
 		bindEvent: function(){	// 绑定事件
 			this.timerStart();	// 定时器
@@ -170,6 +175,27 @@ $.fn.wqzImgBox?console.error("jQuery插件冲突！\n文件："+decodeURICompone
 			}
 			// 初始化图片
 			($plugin.effectInit[effectTypeName] || $plugin.effectInit["en0"])($plugin);
+		},
+		btBarLayout: function(){	// 底部工具栏布局
+			var $plugin = this;
+			
+			// 底部工具栏小点
+			var $btBarNode = $("<div></div>")
+			
+			// 底部工具栏容器
+			var $btBar = $("<div></div>").css(){
+				position:	"absolute",
+				bottom:		$plugin._options.btBar.bottomPx
+			};
+			if($plugin._options.btBar.align=="right"){
+				$btBar.css("right",$plugin._options.btBar.rightPx);
+			}else if($plugin._options.btBar.align=="left"){
+				$btBar.css("left",$plugin._options.btBar.leftPx);
+			}else{
+				$btBar.css({
+					margin:	"0 auto"
+				});
+			}
 		},
 		timerStart: function(){			// 启动定时器
 			var $plugin = this;
