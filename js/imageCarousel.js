@@ -89,6 +89,7 @@ $.fn.wqzImgBox?console.error("jQuery插件冲突！\n文件："+decodeURICompone
 			align:	"center",		// 底部工具栏布局方式(left,right,center)
 			enableSwitch:	false,	// 是否允许通过底部工具栏来切换图片
 			switchType:	"click",	// 底部工具栏切换图片的默认触发方式。默认为"click"
+			gap:		10,			// 每个元素之间的间隙
 			
 			bottomPx:	10,			// 底部工具栏距离底部的距离,单位为px
 			leftPx:	10,				// 底部工具栏距离左侧的距离(前提是底部工具栏水平方向布局方式为left)
@@ -178,15 +179,14 @@ $.fn.wqzImgBox?console.error("jQuery插件冲突！\n文件："+decodeURICompone
 		},
 		btBarLayout: function(){	// 底部工具栏布局
 			var $plugin = this;
-			
-			// 底部工具栏小点
-			var $btBarNode = $("<div></div>")
+			var imgNumber = $plugin.$imgChild.length;
 			
 			// 底部工具栏容器
-			var $btBar = $("<div></div>").css(){
+			var $btBar = $("<div></div>").css({
+				"z-index":	999,
 				position:	"absolute",
 				bottom:		$plugin._options.btBar.bottomPx
-			};
+			});
 			if($plugin._options.btBar.align=="right"){
 				$btBar.css("right",$plugin._options.btBar.rightPx);
 			}else if($plugin._options.btBar.align=="left"){
@@ -196,6 +196,25 @@ $.fn.wqzImgBox?console.error("jQuery插件冲突！\n文件："+decodeURICompone
 					margin:	"0 auto"
 				});
 			}
+			
+			// 底部工具栏小点
+			for(var i=0; i<imgNumber; i++){
+				var $btBarNode = $("<div></div>").css({
+					"margin-right": (i==imgNumber-1)?0:$plugin._options.btBar.gap,
+					background:	"#868686",
+					opacity:	0.8,
+					display:	"inline-block",
+					width: 		"16px",
+					height: 	"16px",
+					"border-radius":	"50%"
+				}).hover(function(){
+					$(this).css("background","#4BA2EF");
+				},function(){
+					$(this).css("background","#868686");
+				}).appendTo($btBar);
+			}
+			
+			$btBar.appendTo($plugin.$elem);
 		},
 		timerStart: function(){			// 启动定时器
 			var $plugin = this;
@@ -263,7 +282,7 @@ $.fn.wqzImgBox?console.error("jQuery插件冲突！\n文件："+decodeURICompone
 				var imgNumber = $plugin.$imgChild.length;
 				$plugin.$imgChild.each(function(index,dom){
 					$(this).css({
-						"z-index":	imgNumber - index,
+//						"z-index":	imgNumber - index,
 						width:	$plugin.$elem.innerWidth(),
 						height:	$plugin.$elem.innerHeight(),
 						position:	"absolute",
@@ -272,7 +291,8 @@ $.fn.wqzImgBox?console.error("jQuery插件冲突！\n文件："+decodeURICompone
 						overflow:	"hidden"
 					}).wrap(function(){
 						return $("<div></div>").css({
-							"z-index":	$(this).css("z-index"),
+//							"z-index":	$(this).css("z-index"),
+							"z-index":	imgNumber - index,
 							width: "100%",
 							height:	"100%",
 							position:	"absolute",
