@@ -38,6 +38,8 @@
  * 		1. 如果第三方插件中的jquery扩展中定义了function wqzImgBox()方法，是否会对此插件有影响？
  * 		2. 如何使showDuration不包含switchDuration？
  * 			解决：每次执行动画前清除掉定时器，执行完动画后再重新启动定时器。
+ * 		3. 执行过destroy方法后（clearInterval($plugin.timer)，timerStart()还在一直循环执行
+ * 			解决方案：在每次执行timerStart()前判断是否已经destroy了,在destroy方法中，对会改变文档结构的unwrap()方法，延后执行
  * 
  * gitHub：	https://github.com/wuqingzhou/imageCarousel
  * 
@@ -105,17 +107,23 @@ $.fn.wqzImgBox?console.error("jQuery插件冲突！\n文件："+decodeURICompone
 	$.fn.wqzImgBox.methods = {
 		// 注销此对象上的插件
 		destroy: function($elem,param){
-//			if( $elem.data("_wqzImgBox")._options.btBar.enable ){
-//				$elem.data("_wqzImgBox").$btBar.remove();
-//			}
+			var $plugin = $elem.data("_wqzImgBox");
+//			console.info("destroy: " + $plugin.timerArray.toString());
+			$plugin.enable = false;
+			clearInterval($plugin.timer);
+			if( $plugin._options.btBar.enable ){
+				$plugin.$btBar.remove();
+			}
 //			if( $elem.data("_wqzImgBox")._options.sideBar.enable ){
 //				$elem.data("_wqzImgBox").$ltSideBar.remove();
 //				$elem.data("_wqzImgBox").$rtSideBar.remove();
 //			}
-			if($elem.data("_wqzImgBox")._options.effectType == 3){
-				$elem.find(".wqzImgBoxItem").unwrap();
+			if($plugin._options.effectType == 3){
+				setTimeout(function(){
+					$elem.find(".wqzImgBoxItem").unwrap();					
+				},100);
 			}
-			clearInterval($elem.data("_wqzImgBox").timer);
+//			clearInterval($plugin.timer);
 			$elem.removeData("_wqzImgBox");
 		}
 	};
@@ -132,7 +140,9 @@ $.fn.wqzImgBox?console.error("jQuery插件冲突！\n文件："+decodeURICompone
 //		this.$ltSideBar = null;					// 左侧工具栏
 //		this.$rtSideBar = null;					// 右侧工具栏
 		this.timer = null;						// 定时器
+		this.enable = true;
 //		this.curTime = (new Date()).getTime();	// 当前时间
+//		this.timerArray = new Array();			// 生成过的定时器列表
 	};
 		
 	/* 
@@ -147,6 +157,7 @@ $.fn.wqzImgBox?console.error("jQuery插件冲突！\n文件："+decodeURICompone
 	 */
 	wqzImgBox.prototype = {
 		generate: function(){	// 生成插件
+			this.enable = true;
 			this.layout();		// 布局
 			this.bindEvent();	// 绑定事件
 		},
@@ -203,7 +214,7 @@ $.fn.wqzImgBox?console.error("jQuery插件冲突！\n文件："+decodeURICompone
 					"margin-right": (i==imgNumber-1)?0:$plugin._options.btBar.gap,
 					background:	"#868686",
 					opacity:	0.8,
-					display:	"inline-block",
+					float:		"left",
 					width: 		"16px",
 					height: 	"16px",
 					"border-radius":	"50%"
@@ -215,12 +226,15 @@ $.fn.wqzImgBox?console.error("jQuery插件冲突！\n文件："+decodeURICompone
 			}
 			
 			$btBar.appendTo($plugin.$elem);
+			$plugin.$btBar = $btBar;
 		},
 		timerStart: function(){			// 启动定时器
 			var $plugin = this;
 			$plugin.timer = setTimeout(function(){
 				$plugin.showNextImg();
-			},$plugin._options.showDuration);	
+			},$plugin._options.showDuration);
+			console.info("已绑定定时器： " + $plugin.timer);
+//			$plugin.timerArray.push($plugin.timer);
 		},
 		showNextImg: function(){		// 显示下一张图片
 			var $plugin = this;
@@ -236,8 +250,14 @@ $.fn.wqzImgBox?console.error("jQuery插件冲突！\n文件："+decodeURICompone
 			($plugin.effectList[effectTypeName] || $plugin.effectList["en0"])($plugin,curImgNo,tgtImgNo,rollTo,function(){
 				// 切换完后执行回调函数
 				$plugin.curImgNo = $plugin.tgtImgNo;
+				if($plugin._options.btBar.enable){
+					$plugin.$btBar.children().css("background","#868686").eq($plugin.curImgNo).css("background","#4BA2EF");
+				}
 				$plugin._options.onAfterSwitch.call($plugin.$imgChild.eq($plugin.curImgNo)[0]);
-				$plugin.timerStart();				// 启动定时器
+				
+				if($plugin.enable){
+					$plugin.timerStart();				// 启动定时器
+				}
 			});
 		},
 		/*=================================== 图片切换效果初始化 开始 ====================================================*/
